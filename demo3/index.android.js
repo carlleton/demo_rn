@@ -10,10 +10,17 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import TabNavigator from 'react-native-tab-navigator';
 
 import List from './app/list/index';
-import My from './app/my/index';
 import Edit from './app/edit/index';
+import My from './app/my/index';
 
 export default class demo3 extends Component {
+  constructor(props) {
+    super(props);
+  
+    this.state = {
+      selectedTab:'list'
+    };
+  }
   render() {
     return (
       <TabNavigator
@@ -22,24 +29,24 @@ export default class demo3 extends Component {
       >
           <TabNavigator.Item
               selected={this.state.selectedTab === 'list'}
-              renderIcon={() => <Icon name={ 'ios-home' } size={30} color={'gray'}/>}
-              renderSelectedIcon={() => <Icon name={ 'ios-home' } size={30} color={'#4E78E7'}/>}
+              renderIcon={() => <Icon name='ios-home-outline' size={30} color={'gray'}/>}
+              renderSelectedIcon={() => <Icon name='ios-home' size={30} color={'#4E78E7'}/>}
               onPress={() => this.setState({selectedTab: 'list'})}
               >
            <List />
           </TabNavigator.Item>
          <TabNavigator.Item
             selected={this.state.selectedTab === 'edit'}
-            renderIcon={() => <Icon name={ 'ion-videocamera' } size={30} color={'gray'}/>}
-            renderSelectedIcon={() => <Icon name={ 'ion-videocamera' } size={30} color={'#4E78E7'}/>}
+            renderIcon={() => <Icon name='ios-videocam-outline' size={30} color={'gray'}/>}
+            renderSelectedIcon={() => <Icon name='ios-videocam' size={30} color={'#4E78E7'}/>}
             onPress={() => this.setState({selectedTab: 'edit'})}
           >
              <Edit />
          </TabNavigator.Item>
          <TabNavigator.Item
             selected={this.state.selectedTab === 'my'}
-            renderIcon={() => <Icon name={ 'ios-more' } size={30} color={'gray'}/>}
-            renderSelectedIcon={() => <Icon name={ 'ios-more' } size={30} color={'#4E78E7'}/>}
+            renderIcon={() => <Icon name='ios-more-outline' size={30} color={'gray'}/>}
+            renderSelectedIcon={() => <Icon name='ios-more' size={30} color={'#4E78E7'}/>}
             onPress={() => this.setState({
               selectedTab: 'my'
             })}
