@@ -5,11 +5,21 @@
  */
 
 import React, { Component } from 'react';
-import { AppRegistry, StyleSheet, Text, View } from 'react-native';
+import { 
+  AppRegistry,
+  StyleSheet, 
+  Text, 
+  View
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import TabNavigator from 'react-native-tab-navigator';
+import {
+  StackNavigator,
+  TabNavigator,
+} from 'react-navigation';
+
 
 import List from './app/list/index';
+import ListDetail from './app/list/detail';
 import Edit from './app/edit/index';
 import My from './app/my/index';
 
@@ -18,42 +28,82 @@ export default class demo3 extends Component {
     super(props);
   
     this.state = {
-      selectedTab:'list'
+      selectedTab:'list',
     };
   }
+  
   render() {
+    var ListNavigator = StackNavigator({
+      List: {
+        screen: List,
+        navigationOptions: ({navigation}) => ({
+            title: '列表页面'
+        }),
+      },
+      ListDetail: {
+        screen: ListDetail,
+        navigationOptions:({navigation})=>({
+          tabBarVisible:false,//是否隐藏标签栏。默认不隐藏(true) 
+        })
+      },
+    },{
+      navigationOptions: {
+          headerTitleStyle: styles.headerTitle,
+          headerStyle: styles.header,
+          gesturesEnabled:true,//是否支持滑动返回手势，iOS默认支持，安卓默认关闭 
+      },
+      
+    })
+    const Tab=TabNavigator({
+      List:{
+        screen:ListNavigator,
+        navigationOptions:{
+          tabBarIcon:({focused,tintColor})=>(
+            <Icon name={focused?'ios-home':'ios-home-outline'} size={30} color={tintColor}/>
+          )
+        }
+      },
+      Edit:{
+        screen:Edit,
+        navigationOptions:{
+          tabBarIcon:({focused,tintColor})=>(
+            <Icon name={focused?'ios-videocam':'ios-videocam-outline'} size={30} color={tintColor}/>
+          )
+        }
+      },
+      My:{
+        screen:My,
+        navigationOptions:{
+          tabBarIcon:({focused,tintColor})=>(
+            <Icon name={focused?'ios-more':'ios-more-outline'} size={30} color={tintColor}/>
+          )
+        }
+      }
+    },{
+      animationEnabled: true, // 切换页面时是否有动画效果
+      tabBarPosition: 'bottom', // 显示在底端，android 默认是显示在页面顶端的
+      swipeEnabled: false, // 是否可以左右滑动切换tab
+      backBehavior: 'none', // 按 back 键是否跳转到第一个Tab(首页)， none 为不跳转
+      visible:false,
+      tabBarOptions: {
+        showLabel:false,//默认显示标签
+        activeTintColor: '#4E78E7', // 文字和图片选中颜色
+        inactiveTintColor: 'gray', // 文字和图片未选中颜色
+        showIcon: true, // android 默认不显示 icon, 需要设置为 true 才会显示
+        indicatorStyle: {
+            height: 0  // 如TabBar下面显示有一条线，可以设高度为0后隐藏
+        }, 
+        style: {
+            backgroundColor: '#fff', // TabBar 背景色
+            // height: 44
+        },
+        labelStyle: {
+            fontSize: 10, // 文字大小
+        }
+      },
+    });
     return (
-      <TabNavigator
-       tabBarStyle={{backgroundColor: 'white'}}
-        style={{backgroundColor: 'white'}}
-      >
-          <TabNavigator.Item
-              selected={this.state.selectedTab === 'list'}
-              renderIcon={() => <Icon name='ios-home-outline' size={30} color={'gray'}/>}
-              renderSelectedIcon={() => <Icon name='ios-home' size={30} color={'#4E78E7'}/>}
-              onPress={() => this.setState({selectedTab: 'list'})}
-              >
-           <List />
-          </TabNavigator.Item>
-         <TabNavigator.Item
-            selected={this.state.selectedTab === 'edit'}
-            renderIcon={() => <Icon name='ios-videocam-outline' size={30} color={'gray'}/>}
-            renderSelectedIcon={() => <Icon name='ios-videocam' size={30} color={'#4E78E7'}/>}
-            onPress={() => this.setState({selectedTab: 'edit'})}
-          >
-             <Edit />
-         </TabNavigator.Item>
-         <TabNavigator.Item
-            selected={this.state.selectedTab === 'my'}
-            renderIcon={() => <Icon name='ios-more-outline' size={30} color={'gray'}/>}
-            renderSelectedIcon={() => <Icon name='ios-more' size={30} color={'#4E78E7'}/>}
-            onPress={() => this.setState({
-              selectedTab: 'my'
-            })}
-            >
-             <My />
-         </TabNavigator.Item>
-     </TabNavigator>
+      <Tab />
     );
   }
 }
@@ -64,6 +114,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
+  },
+  header:{
+    paddingTop:25,
+    paddingBottom:12,
+    backgroundColor:'#ee735c',
+  },
+  headerTitle:{
+    color:'#fff',
+    fontSize:16,
+    fontWeight:'600',
+    alignSelf : 'center'
   },
   welcome: {
     fontSize: 20,

@@ -62,7 +62,7 @@ class ListItem extends Component{
     }
     render(){
         var row=this.state.row;
-        return (<TouchableHighlight>
+        return (<TouchableHighlight onPress={this.props.onSelect}>
             <View style={styles.item}>
                 <Text style={styles.title}>{row.title}</Text>
                 <Image 
@@ -178,9 +178,18 @@ class List extends Component {
         }
         this._fetchData(0);
     }
+    _loadPage(row){
+        this.props.navigation.navigate('ListDetail',{
+            row:row
+        })
+    }
     _keyExtractor = (item, index) => item._id
     _renderRow=({item})=>{
-        return <ListItem row={item} />
+        return <ListItem
+         key={item._id} 
+         onSelect={()=>this._loadPage(item)} 
+         row={item} 
+         />
     };
     _renderFooter(){
         if(!this._hasMore()){
@@ -198,9 +207,6 @@ class List extends Component {
     render() {
         return (
           <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>列表页面</Text>
-            </View>
             <FlatList
                 data={this.state.sourceData}
                 renderItem={this._renderRow.bind(this)}
