@@ -11,6 +11,8 @@ var config = {
     },
     api:{
         list:base+'api/list',
-    }
+        up:base+'api/up',
+    },
+    access_token:'asdffc'
 }
 module.exports = config;
