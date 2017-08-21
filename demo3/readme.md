@@ -7,6 +7,7 @@
 * 在this只在组件渲染时调用一次，异步的都必须bind
 * 官方推荐使用`react-navigation`来进行页面路由跳转~~各种坑
 * 在相应页面的navigationOptions中设置`tabBarVisible:false`即可隐藏标签栏，并不是TabNavigator独有
+* 所有资源使用`uri`，而不是`url`。往往查了半天就是这块的问题
 
 
 **react-navigation**

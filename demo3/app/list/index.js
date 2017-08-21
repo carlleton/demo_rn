@@ -180,7 +180,7 @@ class List extends Component {
     }
     _loadPage(row){
         this.props.navigation.navigate('ListDetail',{
-            row:row
+            data:row
         })
     }
     _keyExtractor = (item, index) => item._id
