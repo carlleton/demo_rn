@@ -12,6 +12,7 @@ var config = {
     api:{
         list:base+'api/list',
         up:base+'api/up',
+        comment:base+'api/comment'
     },
     access_token:'asdffc'
 }

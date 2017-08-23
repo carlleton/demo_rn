@@ -9,7 +9,8 @@ import {
   AppRegistry,
   StyleSheet, 
   Text, 
-  View
+  View,
+  Dimensions
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {
@@ -23,6 +24,7 @@ import ListDetail from './app/list/detail';
 import Edit from './app/edit/index';
 import My from './app/my/index';
 
+var width = Dimensions.get('window').width;
 export default class demo3 extends Component {
   constructor(props) {
     super(props);
@@ -44,6 +46,7 @@ export default class demo3 extends Component {
         screen: ListDetail,
         navigationOptions:({navigation})=>({
           tabBarVisible:false,//是否隐藏标签栏。默认不隐藏(true) 
+          header:null
         })
       },
     },{
