@@ -5,6 +5,7 @@ import {
   Text, 
   View,
   ActivityIndicator,
+  TouchableOpacity,
   Dimensions
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -21,6 +22,7 @@ class ListDetail extends Component {
       rate:1,
       muted:false,
       resizeMode:'contain',
+      paused:false,
       repeat:false,
       videoLoaded:false,
       playing:false,
@@ -73,6 +75,20 @@ class ListDetail extends Component {
   _rePlay(){
     this.refs.videoPlayer.seek(0);
   }
+  _pause(){
+    if(!this.state.paused){
+      this.setState({
+        paused:true
+      })
+    }
+  }
+  _resume(){
+    if(this.state.paused){
+      this.setState({
+        paused:false
+      })
+    }
+  }
   render() {
     var data=this.state.data;
     return (
@@ -107,6 +123,17 @@ class ListDetail extends Component {
                 name='ios-play'
                 size={48}
                 style={styles.playIcon} />
+            : null
+          }
+          {
+            this.state.videoLoaded && this.state.playing
+            ? <TouchableOpacity onPress={this._pause.bind(this)} style={styles.pauseBtn}>
+                {
+                  this.state.paused
+                  ? <Icon onPress={this._resume.bind(this)} name='ios-play' size={48} style={styles.resumeIcon} />
+                  : <Text></Text>
+                }
+              </TouchableOpacity>
             : null
           }
           <View style={styles.progressBox}>
@@ -152,6 +179,27 @@ const styles = StyleSheet.create({
     backgroundColor:'#ff6600'
   },
   playIcon:{
+    position:'absolute',
+    top:140,
+    left:width/2-30,
+    width:60,
+    height:60,
+    paddingTop:8,
+    paddingLeft:22,
+    backgroundColor:'transparent',
+    borderColor:'#fff',
+    borderWidth:1,
+    borderRadius:30,
+    color:'#ee7b66'
+  },
+  pauseBtn:{
+    position:'absolute',
+    left:0,
+    top:0,
+    width:width,
+    height:360
+  },
+  resumeIcon:{
     position:'absolute',
     top:140,
     left:width/2-30,
