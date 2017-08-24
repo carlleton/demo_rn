@@ -5,7 +5,6 @@ import {
   Text, 
   View,
   Image,
-  ScrollView,
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
@@ -19,6 +18,11 @@ var request = require('../common/request')
 var config = require('../common/config')
 var width = Dimensions.get('window').width;
 
+var cacheResults={
+    nextPage:1,
+    items:[],
+    total:0
+}
 class ListDetail extends Component {
   constructor(props) {
     super(props);
@@ -36,7 +40,9 @@ class ListDetail extends Component {
       videoProgress:0.01,//播放进度
       videoTotal:0,//总时长
       currentTime:0,//当前时间
-      videoOK:true
+      videoOK:true,
+      isLoading:false,
+      isRefreshing:false,
     };
   }
   static navigationOptions = ({navigation}) => ({
@@ -109,39 +115,81 @@ class ListDetail extends Component {
     }
   }
   componentDidMount(){
-    this._fetchData();
+    cacheResults.nextPage=1;
+    this._fetchData(cacheResults.nextPage);
   }
-  _fetchData(){
-    var url=config.api.comment;
-    request.get(url,{
-      videoid:this.state.data._id
+  _fetchData(page){
+    this.setState({
+        isLoading:true
     })
-    .then((json)=>{
+    request.get(config.api.comment,{
+        page:page,
+        videoid:this.state.data._id
+    }).then((json) => {
       if(json.result=='0'){
-        var comments = json.data;
-        if(comments && comments.length>0){
+          var items = cacheResults.items.slice();
+          cacheResults.items=items.concat(json.data)
+          cacheResults.nextPage+=1;
           this.setState({
-            comments:comments
+              comments:cacheResults.items.slice(),
+              isLoading:false
           })
-        }
+          cacheResults.total=json.total;
+      }else{
+          console.log(JSON.stringify(json));
       }
     })
-    .catch((error)=>{
-      console.log(error);
-    })
+    .catch((error) => {
+      this.setState({
+          isLoading:false
+      })
+    });
+  }
+  _hasMore(){
+      if(cacheResults.total==0)return true;
+      return cacheResults.items.length < cacheResults.total
+  }
+  _fetchMoreData(){
+      if(!this._hasMore() || this.state.isLoading)return;
+      this._fetchData(cacheResults.nextPage);
   }
   _keyExtractor = (item, index) => item._id
-  _renderRow(row){
+  _renderRow=({item})=>{
     return (
-      <View key={row._id} style={styles.replayBox}>
-        <Image style={styles.replyAvatar} source={{uri:row.replyBy.avatar}} />
+      <View key={item._id} style={styles.replayBox}>
+        <Image style={styles.replyAvatar} source={{uri:item.replyBy.avatar}} />
         <View style={styles.reply}>
-          <Text style={styles.replyNickname}>{row.replyBy.nickname}</Text>
-          <Text style={styles.replyContent}>{row.content}</Text>
+          <Text style={styles.replyNickname}>{item.replyBy.nickname}</Text>
+          <Text style={styles.replyContent}>{item.content}</Text>
         </View>
       </View>
     )
   }
+  _renderHeader(){
+    var data=this.state.data;
+    return (
+      <View style={styles.infoBox}>
+          <Image style={styles.avatar} source={{uri:data.author.avatar}} />
+          <View style={styles.descBox}>
+            <Text style={styles.nickname}>{data.author.nickname}</Text>
+            <Text style={styles.title}>{data.title}</Text>
+          </View>
+        </View>
+    );
+  }
+  _renderFooter(){
+        if(!this._hasMore()){
+            return (
+                <View style={styles.loadingMore}>
+                    <Text style={styles.loadingText}>没有更多了</Text>
+                </View>
+            )
+        }
+        if(this.isLoading){
+            return (<View style={styles.loadingMore} />)
+        }
+        return <ActivityIndicator animating={true} style={styles.loadingMore} />
+    }
   render() {
     var data=this.state.data;
     return (
@@ -205,24 +253,16 @@ class ListDetail extends Component {
             </View>
           </View>
         </View>
-        <ScrollView
-          automaticallyAdjustContentInsets={false}
-          enableEmptySections={true}
-          showVerticalScrollIndicator={false}
-          style={styles.scrollView}>
-          <View style={styles.infoBox}>
-            <Image style={styles.avatar} source={{uri:data.author.avatar}} />
-            <View style={styles.descBox}>
-              <Text style={styles.nickname}>{data.author.nickname}</Text>
-              <Text style={styles.title}>{data.title}</Text>
-            </View>
-          </View>
           <FlatList
-                data={this.state.sourceData}
-                renderItem={this._renderRow.bind(this)}
-                refreshing={this.state.isRefreshing}
-             />
-        </ScrollView>
+              data={this.state.comments}
+              renderItem={this._renderRow.bind(this)}
+              onEndReached={this._fetchMoreData.bind(this)}
+              onEndReachedThreshold={20}
+              refreshing={this.state.isRefreshing}
+              keyExtractor={this._keyExtractor.bind(this)}
+              ListFooterComponent={this._renderFooter.bind(this)}
+              ListHeaderComponent={this._renderHeader.bind(this)}
+           />
       </View>
     )
   }
@@ -383,6 +423,13 @@ const styles = StyleSheet.create({
   },
   reply:{
     flex:1
+  },
+  loadingMore:{
+    marginVertical:20,
+  },
+  loadingText:{
+    color:'#777',
+    textAlign:'center'
   }
 });
 
