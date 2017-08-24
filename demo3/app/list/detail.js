@@ -6,12 +6,16 @@ import {
   View,
   Image,
   FlatList,
+  TextInput,
+  Modal,
+  Alert,
   ActivityIndicator,
   TouchableOpacity,
   Dimensions
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Video from 'react-native-video';    
+import Video from 'react-native-video';
+import Button from 'react-native-button';
 //var Video = require('react-native-video').default;
 
 var request = require('../common/request')
@@ -43,6 +47,12 @@ class ListDetail extends Component {
       videoOK:true,
       isLoading:false,
       isRefreshing:false,
+
+      //modal
+      content:'',
+      animationType:'none',
+      modalVisible:false,
+      isSending:false
     };
   }
   static navigationOptions = ({navigation}) => ({
@@ -165,16 +175,94 @@ class ListDetail extends Component {
       </View>
     )
   }
+  _focus(){
+    this._setModalVisible(true).bind(this);
+  }
+  _blur(){
+
+  }
+  _closeModal(){
+    this._setModalVisible(false).bind(this);
+  }
+  _setModalVisible(isVisible){
+    this.setState({
+      modalVisible:isVisible
+    })
+  }
+  //评论
+  _submit(){
+    if(!this.state.content){
+      return Alert.alert('留言不能为空');
+    }
+    if(this.state.isSending){
+      return Alert.alert('正在评论中！');
+    }
+    this.setState({
+      isSending:true
+    },()=>{
+        var body={
+          vieoid:this.data._id,
+          content:this.state.content
+        };
+        var url=config.comment;
+        request.post(url,body)
+          .then((json)=>{
+            if(json && json.result=='0'){
+              var content=this.state.content;
+              var items=cacheResults.items.slice();
+              items=[{
+                content:content,
+                replyBy:{
+                  nickname:'小v说',
+                  avatar:'http://dummyimage.com/640x640/ccbcba',
+                }
+              }].concat(items);
+              cacheResults.items = items;
+              cacheResults.total++;
+              this.setState({
+                isSending:false,
+                comments:cacheResults.items,
+                content:''
+              })
+              this._setModalVisible(false).bind(this);
+            }
+          })
+          .cache((err)=>{
+            thie.setState({
+              isSending:false,
+            });
+            this._setModalVisible(false).bind(this);
+            Alert.alert('留言失败，稍后重试！');
+          })
+      }
+    })
+  }
   _renderHeader(){
     var data=this.state.data;
     return (
-      <View style={styles.infoBox}>
+      <View style={styles.listHeader}>
+        <View style={styles.infoBox}>
           <Image style={styles.avatar} source={{uri:data.author.avatar}} />
           <View style={styles.descBox}>
             <Text style={styles.nickname}>{data.author.nickname}</Text>
             <Text style={styles.title}>{data.title}</Text>
           </View>
         </View>
+        <View style={styles.commentBox}>
+          <View style={styles.comment}>
+            <TextInput
+              placeholder="敢不敢评论一个..."
+              style={styles.content}
+              multiline={true}
+              onFocus={this._focus.bind(this)}
+              />
+          </View>
+        </View>
+        <View style={styles.commentArea}>
+          <Text style={styles.commentTitle}>精彩评论</Text>
+        </View>
+      </View>
+      
     );
   }
   _renderFooter(){
@@ -263,6 +351,35 @@ class ListDetail extends Component {
               ListFooterComponent={this._renderFooter.bind(this)}
               ListHeaderComponent={this._renderHeader.bind(this)}
            />
+           <Modal
+            animationType={'fade'}
+            visible={this.state.modalVisible}
+            onRequestCLose={()=>{this._setModalVisible(false).bind(this)}}>
+              <View style={styles.modalContainer}>
+                <Icon
+                  onPress={this._closeModal.bind(this)}
+                  name='ios-close-outline'
+                  style={styles.closeIcon} />
+                <View style={styles.commentBox}>
+                  <View style={styles.comment}>
+                    <TextInput
+                      placeholder="敢不敢评论一个..."
+                      style={styles.content}
+                      multiline={true}
+                      defaultValue={this.state.content}
+                      onChangeText={(text)=>{
+                        this.setState({
+                          content:text
+                        });
+                      }}
+                      />
+                  </View>
+                </View>
+                <Button style={styles.submitBtn} onPress={this._submit.bind(this)}>
+                  评论
+                </Button>
+              </View>
+            </Modal>
       </View>
     )
   }
@@ -271,6 +388,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5FCFF',
+  },
+  modalContainer:{
+    flex:1,
+    paddingTop:45,
+    backgroundColor:'#fff'
+  },
+  closeIcon:{
+    alignSelf:'center',
+    fontSize:30,
+    color:'#ee753c'
+  },
+  submitBtn:{
+    width:width-20,
+    padding:16,
+    marginTop:20,
+    marginBottom:20,
+    borderWidth:1,
+    borderColor:'#ee753c',
+    borderRadius:4,
+    color:'#ee753c',
+    fontSize:18
   },
   header:{
     flexDirection:'row',
@@ -430,6 +568,33 @@ const styles = StyleSheet.create({
   loadingText:{
     color:'#777',
     textAlign:'center'
+  },
+  listHeader:{
+    marginTop:10,
+    width:width
+  },
+  commentBox:{
+    marginTop:10,
+    marginBottom:10,
+    padding:8,
+    width:width
+  },
+  content:{
+    paddingLeft:2,
+    color:'#333',
+    borderWidth:11,
+    borderColor:'#ddd',
+    borderRadius:4,
+    fontSize:14,
+    height:80
+  },
+  commentArea:{
+    width:width,
+    paddingBottom:6,
+    paddingLeft:10,
+    paddingRight:10,
+    borderBottomWidth:1,
+    borderBottomColor:'#eee'
   }
 });
 
