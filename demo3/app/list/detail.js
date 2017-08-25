@@ -176,13 +176,13 @@ class ListDetail extends Component {
     )
   }
   _focus(){
-    this._setModalVisible(true).bind(this);
+    this._setModalVisible(true);
   }
   _blur(){
 
   }
   _closeModal(){
-    this._setModalVisible(false).bind(this);
+    this._setModalVisible(false);
   }
   _setModalVisible(isVisible){
     this.setState({
@@ -224,18 +224,18 @@ class ListDetail extends Component {
                 comments:cacheResults.items,
                 content:''
               })
-              this._setModalVisible(false).bind(this);
+              this._setModalVisible(false);
             }
           })
           .cache((err)=>{
             thie.setState({
               isSending:false,
             });
-            this._setModalVisible(false).bind(this);
+            this._setModalVisible(false);
             Alert.alert('留言失败，稍后重试！');
           })
       }
-    })
+    )
   }
   _renderHeader(){
     var data=this.state.data;
@@ -354,7 +354,7 @@ class ListDetail extends Component {
            <Modal
             animationType={'fade'}
             visible={this.state.modalVisible}
-            onRequestCLose={()=>{this._setModalVisible(false).bind(this)}}>
+            onRequestClose={()=>{this._setModalVisible.bind(this,false)}}>
               <View style={styles.modalContainer}>
                 <Icon
                   onPress={this._closeModal.bind(this)}
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     width:width
   },
   content:{
-    paddingLeft:2,
+    paddingLeft:20,
     color:'#333',
     borderWidth:11,
     borderColor:'#ddd',
