@@ -201,7 +201,7 @@ class ListDetail extends Component {
       isSending:true
     },()=>{
         var body={
-          vieoid:this.data._id,
+          vieoid:this.state.data._id,
           content:this.state.content
         };
         var url=config.comment;
@@ -227,7 +227,7 @@ class ListDetail extends Component {
               this._setModalVisible(false);
             }
           })
-          .cache((err)=>{
+          .catch((err)=>{
             thie.setState({
               isSending:false,
             });
@@ -249,14 +249,12 @@ class ListDetail extends Component {
           </View>
         </View>
         <View style={styles.commentBox}>
-          <View style={styles.comment}>
             <TextInput
               placeholder="敢不敢评论一个..."
               style={styles.content}
               multiline={true}
               onFocus={this._focus.bind(this)}
               />
-          </View>
         </View>
         <View style={styles.commentArea}>
           <Text style={styles.commentTitle}>精彩评论</Text>
@@ -361,7 +359,6 @@ class ListDetail extends Component {
                   name='ios-close-outline'
                   style={styles.closeIcon} />
                 <View style={styles.commentBox}>
-                  <View style={styles.comment}>
                     <TextInput
                       placeholder="敢不敢评论一个..."
                       style={styles.content}
@@ -373,7 +370,6 @@ class ListDetail extends Component {
                         });
                       }}
                       />
-                  </View>
                 </View>
                 <Button style={styles.submitBtn} onPress={this._submit.bind(this)}>
                   评论
