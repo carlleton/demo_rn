@@ -87,8 +87,9 @@ class ListDetail extends Component {
     this.setState(newState);
   }
   _onEnd(){
+    console.log('on end');
     this.setState({
-      videoProgress:1,
+      paused:true,
       playing:false
     })
   }
@@ -103,7 +104,7 @@ class ListDetail extends Component {
     console.log('buffer')
   }
   _rePlay(){
-    this.refs.videoPlayer.seek(0);
+    this.videoPlayer.seek(0);
     if(this.state.paused){
       this.setState({
         paused:false
@@ -141,10 +142,11 @@ class ListDetail extends Component {
           cacheResults.items=items.concat(json.data)
           cacheResults.nextPage+=1;
           this.setState({
-              comments:cacheResults.items.slice(),
+              comments:cacheResults.items,
               isLoading:false
           })
           cacheResults.total=json.total;
+          console.log(cacheResults);
       }else{
           console.log(JSON.stringify(json));
       }
@@ -185,6 +187,7 @@ class ListDetail extends Component {
     this._setModalVisible(false);
   }
   _setModalVisible(isVisible){
+    console.log(isVisible);
     this.setState({
       modalVisible:isVisible
     })
@@ -195,7 +198,7 @@ class ListDetail extends Component {
       return Alert.alert('留言不能为空');
     }
     if(this.state.isSending){
-      return Alert.alert('正在评论中！');
+      //return Alert.alert('正在评论中！');
     }
     this.setState({
       isSending:true
@@ -204,31 +207,34 @@ class ListDetail extends Component {
           vieoid:this.state.data._id,
           content:this.state.content
         };
-        var url=config.comment;
+        var url=config.api.comment;
         request.post(url,body)
           .then((json)=>{
             if(json && json.result=='0'){
               var content=this.state.content;
               var items=cacheResults.items.slice();
+              
               items=[{
                 content:content,
                 replyBy:{
                   nickname:'小v说',
-                  avatar:'http://dummyimage.com/640x640/ccbcba',
-                }
+                  avatar:'http://dummyimage.com/640x640/ccbcba'
+                },
+                _id:new Date().getTime()
               }].concat(items);
               cacheResults.items = items;
               cacheResults.total++;
               this.setState({
                 isSending:false,
-                comments:cacheResults.items,
+                comments:items,
                 content:''
               })
               this._setModalVisible(false);
             }
           })
           .catch((err)=>{
-            thie.setState({
+            console.log(err);
+            this.setState({
               isSending:false,
             });
             this._setModalVisible(false);
@@ -254,6 +260,8 @@ class ListDetail extends Component {
               style={styles.content}
               multiline={true}
               onFocus={this._focus.bind(this)}
+              underlineColorAndroid={'transparent'}
+              isFocused={(isFocus)=>{console.log(isFocus);}}
               />
         </View>
         <View style={styles.commentArea}>
@@ -289,8 +297,8 @@ class ListDetail extends Component {
         </View>
         <View style={styles.videoBox}>
           <Video
-            ref='videoPlayer'
-            source={{uri:data.video}}
+            ref={(ref: Video) => { this.videoPlayer = ref }}
+            source={{uri:data.video, type: 'mpd'}}
             style={styles.video}
             volume={2}
             paused={this.state.paused}
@@ -361,9 +369,10 @@ class ListDetail extends Component {
                 <View style={styles.commentBox}>
                     <TextInput
                       placeholder="敢不敢评论一个..."
-                      style={styles.content}
+                      style={[styles.content,{height:150}]}
                       multiline={true}
                       defaultValue={this.state.content}
+                      underlineColorAndroid={'transparent'}
                       onChangeText={(text)=>{
                         this.setState({
                           content:text
@@ -400,6 +409,7 @@ const styles = StyleSheet.create({
     padding:16,
     marginTop:20,
     marginBottom:20,
+    marginLeft:10,
     borderWidth:1,
     borderColor:'#ee753c',
     borderRadius:4,
@@ -441,7 +451,7 @@ const styles = StyleSheet.create({
   },
   videoBox:{
     width:width,
-    height:width*0.56,
+    height:width*0.56+2,
     backgroundColor:'#000'
   },
   video:{
@@ -576,13 +586,17 @@ const styles = StyleSheet.create({
     width:width
   },
   content:{
+    padding:0,
     paddingLeft:20,
     color:'#333',
     borderWidth:11,
     borderColor:'#ddd',
     borderRadius:4,
     fontSize:14,
-    height:80
+    height:80,
+    width:width-20,
+    textAlignVertical: 'top',
+    paddingTop:15,
   },
   commentArea:{
     width:width,
