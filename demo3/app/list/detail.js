@@ -360,7 +360,7 @@ class ListDetail extends Component {
            <Modal
             animationType={'fade'}
             visible={this.state.modalVisible}
-            onRequestClose={()=>{this._setModalVisible.bind(this,false)}}>
+            onRequestClose={()=>{this._setModalVisible(false)}}>
               <View style={styles.modalContainer}>
                 <Icon
                   onPress={this._closeModal.bind(this)}
@@ -369,8 +369,9 @@ class ListDetail extends Component {
                 <View style={styles.commentBox}>
                     <TextInput
                       placeholder="敢不敢评论一个..."
-                      style={[styles.content,{height:150}]}
+                      style={[styles.content,styles.contentModal]}
                       multiline={true}
+                      autoFocus={this.state.modalVisible}
                       defaultValue={this.state.content}
                       underlineColorAndroid={'transparent'}
                       onChangeText={(text)=>{
@@ -594,9 +595,12 @@ const styles = StyleSheet.create({
     borderRadius:4,
     fontSize:14,
     height:80,
-    width:width-20,
+    width:width-20
+  },
+  contentModal:{
     textAlignVertical: 'top',
     paddingTop:15,
+    height:150
   },
   commentArea:{
     width:width,
