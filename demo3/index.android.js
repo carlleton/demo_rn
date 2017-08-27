@@ -23,6 +23,7 @@ import List from './app/list/index';
 import ListDetail from './app/list/detail';
 import Edit from './app/edit/index';
 import My from './app/my/index';
+import Login from './app/my/login';
 
 var width = Dimensions.get('window').width;
 export default class demo3 extends Component {
@@ -75,7 +76,7 @@ export default class demo3 extends Component {
         }
       },
       My:{
-        screen:My,
+        screen:Login,
         navigationOptions:{
           tabBarIcon:({focused,tintColor})=>(
             <Icon name={focused?'ios-more':'ios-more-outline'} size={30} color={tintColor}/>

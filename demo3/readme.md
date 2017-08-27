@@ -8,6 +8,10 @@
 * 官方推荐使用`react-navigation`来进行页面路由跳转~~各种坑
 * 在相应页面的navigationOptions中设置`tabBarVisible:false`即可隐藏标签栏，并不是TabNavigator独有
 * 所有资源使用`uri`，而不是`url`。往往查了半天就是这块的问题
+* TextInput如果外层没有设置高度，则会因为高度不够被隐藏
+* Android下预iOS下的各组件都有相应的用法和区别，这是react nateive的大坑
+* 倒计时组件`react-native-sk-countdown`需要`react-addons-update`
+* react-native-sk-countdown在ES6中使用需要更改
 
 
 **react-navigation**
@@ -15,3 +19,4 @@
 * [React-navigation之StackNavigator](http://blog.csdn.net/lu1024188315/article/details/73550028)
 * [React Navigation 自认比较好的navigator组件(一)](http://www.jianshu.com/p/80408a62d690)
 * [REACT NATIVE——REACT-NAVIGATION的使用](http://www.cnblogs.com/CrazyWL/p/7283600.html)
+* [react-native-sk-countdown 倒计时组件，不兼容RN 0.30版本](http://coding.imooc.com/learn/questiondetail/2063.html)

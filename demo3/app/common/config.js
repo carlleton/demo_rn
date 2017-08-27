@@ -10,9 +10,11 @@ var config = {
         },
     },
     api:{
-        list:base+'api/list',
-        up:base+'api/up',
-        comment:base+'api/comment'
+        list:base+'api/list',//获取视频列表
+        up:base+'api/up',//点赞功能
+        comment:base+'api/comment',//获取和发生评论
+        signup:base+'api/u/signup',//发送验证码
+        verify:base+'api/u/verify',//验证登录
     },
     access_token:'asdffc'
 }
