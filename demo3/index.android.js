@@ -10,7 +10,8 @@ import {
   StyleSheet, 
   Text, 
   View,
-  Dimensions
+  Dimensions,
+  AsyncStorage
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {
@@ -31,11 +32,46 @@ export default class demo3 extends Component {
     super(props);
   
     this.state = {
+      user:null,
       selectedTab:'list',
+      logined:false,//是否已登录
     };
   }
   
+  componentDidMount(){
+    this._asyncAppStatus();
+  }
+  _asyncAppStatus(){
+    AsyncStorage.getItem('user')
+      .then((data)=>{
+        var user;
+        var newState={};
+        if(data){
+          user=JSON.parse(data);
+        }
+        if(user && user.access_token){//用户已经登录过
+          newState.user=user;
+          newState.logined=true;
+        }else{
+          newState.logined=false;
+        }
+        this.setState(newState);
+      })
+  }
+  _afterLogin(user){
+    user=JSON.stringify(user);
+    AsyncStorage.setItem('user',user)
+      .then(()=>{
+        this.setState({
+          logined:true,
+          user:user
+        })
+      })
+  }
   render() {
+    if(!this.state.logined){
+      return <Login afterLogin={this._afterLogin.bind(this)}></Login>;
+    }
     var ListNavigator = StackNavigator({
       List: {
         screen: List,
@@ -76,7 +112,7 @@ export default class demo3 extends Component {
         }
       },
       My:{
-        screen:Login,
+        screen:My,
         navigationOptions:{
           tabBarIcon:({focused,tintColor})=>(
             <Icon name={focused?'ios-more':'ios-more-outline'} size={30} color={tintColor}/>
