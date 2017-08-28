@@ -12,7 +12,7 @@
 * Android下预iOS下的各组件都有相应的用法和区别，这是react nateive的大坑
 * 倒计时组件`react-native-sk-countdown`需要`react-addons-update`
 * react-native-sk-countdown在ES6中使用需要更改
-
+* 打包apk总是报` 'ProgressComplete ' (ProgressCompleteEvent)`，使用`gradlew assembleRelease --console plain`尝试
 
 **react-navigation**
 * [React Native未来导航者：react-navigation 使用详解](http://blog.csdn.net/sinat_17775997/article/details/72597171)
@@ -20,3 +20,4 @@
 * [React Navigation 自认比较好的navigator组件(一)](http://www.jianshu.com/p/80408a62d690)
 * [REACT NATIVE——REACT-NAVIGATION的使用](http://www.cnblogs.com/CrazyWL/p/7283600.html)
 * [react-native-sk-countdown 倒计时组件，不兼容RN 0.30版本](http://coding.imooc.com/learn/questiondetail/2063.html)
+* [Build APK Failed 'Unable to process incoming event 'ProgressComplete'](https://github.com/facebook/react-native/issues/10515)
