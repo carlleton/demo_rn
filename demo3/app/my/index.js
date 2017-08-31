@@ -5,13 +5,18 @@ import {
   Text, 
   View,
   Image,
+  Alert,
   TouchableOpacity,
   Dimensions,
   AsyncStorage
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ImagePicker from 'react-native-image-picker';
+import sha1 from 'sha1';
 //var ImagePicker = require('NativeModules').ImagePickerManager;
+
+var request = require('../common/request');
+var config = require('../common/config');
 var width = Dimensions.get('window').width;
 var photoOptions = {
   title: '选择头像',
@@ -26,6 +31,18 @@ var photoOptions = {
     path: 'images'
   }
 };
+var CLOUDINARY = {
+  cloud_name: 'carlleton',  
+  api_key: '637443679349469',  
+  api_secret: 'JB-JvKhkesLuwEFdAjB7rCpakQ0', 
+  base:'http://res.cloudinary.com/carlleton',
+  image:'https://api.cloudinary.com/v1_1/carlleton/image/upload',
+  video:'https://api.cloudinary.com/v1_1/carlleton/video/upload',
+  audio:'https://api.cloudinary.com/v1_1/carlleton/raw/upload',
+}
+function avatarimg(id,type){
+  return CLOUDINARY.base+'/'+type+'/upload/'+id;
+}
 class My extends Component {
   constructor(props) {
     super(props);
@@ -70,14 +87,78 @@ class My extends Component {
         //let source = { uri: 'data:image/png;base64,' + response.data };
         var avatarData='data:image/jpeg;base64,' + response.data;
         var user=this.state.user;
-        user.avatar=avatarData;
+        //user.avatar=avatarData;
 
-        AsyncStorage.setItem('user',JSON.stringify(user));
-        this.setState({
-          user: user
-        });
+        //AsyncStorage.setItem('user',JSON.stringify(user));
+        //this.setState({
+        //  user: user
+        //});
+        var timestamp=Date.now();
+        var tags='app,avatar';
+        var folder='avatar';
+        var signatureURL=config.api.signature;
+        var access_token=this.state.user.access_token;
+
+        request.post(signatureURL,{
+          access_token:access_token,
+          timestamp:timestamp,
+          folder:folder,
+          tgs:tags,
+          type:'avatar',
+        })
+        .then((json)=>{
+          if(json.result=='0'){
+            var signature = 'folder='+folder+'&tags='+tags+'&timestamp='+timestamp+CLOUDINARY.api_secret;
+            signature=sha1(signature);
+
+            var body = new FormData();
+            body.append('folder',folder);
+            body.append('signature',signature);
+            body.append('tags',tags);
+            body.append('timestamp',timestamp);
+            body.append('api_key',CLOUDINARY.api_key);
+            body.append('resource_type','image');
+            body.append('file',avatarData);
+
+            this._upload(body);
+          }
+        })
       }
     });
+  }
+  //上传到图床
+  _upload(body){
+    var xhr = new XMLHttpRequest();
+    var url = CLOUDINARY.image;
+
+    xhr.open('POST',url);
+    xhr.onload=()=>{
+      if(xhr.status!==200){
+        Alert.alert('请求失败');
+        console.log(xhr.responseText);
+        return;
+      }
+      if(!xhr.responseText){
+        Alert.alert('请求失败');
+        return;
+      }
+      var response = xhr.responseText;
+      try{
+        response=JSON.parse(response);
+
+      }catch(e){
+        console.log(e);
+        console.log('parse fails');
+      }
+      if(response && response.public_id){
+        var user=this.state.user;
+        user.avatar=avatarimg(response.public_id,'image');
+        this.setState({
+          user:user
+        });
+      }
+    }
+    xhr.send(body);
   }
   render() {
     var user=this.state.user;

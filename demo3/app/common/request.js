@@ -25,7 +25,11 @@ request.get = function(url,params){
 }
 
 request.post = function(url,body){
-    body.access_token=config.access_token;
+    if(body.access_token){
+        config.access_token=body.access_token;
+    }else{
+        body.access_token=config.access_token;
+    }
     var options = _.extend(config.header,{
         body:JSON.stringify(body)
     })
