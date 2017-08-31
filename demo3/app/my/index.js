@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ImagePicker from 'react-native-image-picker';
+import * as Progress from 'react-native-progress';
 import sha1 from 'sha1';
 //var ImagePicker = require('NativeModules').ImagePickerManager;
 
@@ -41,6 +42,12 @@ var CLOUDINARY = {
   audio:'https://api.cloudinary.com/v1_1/carlleton/raw/upload',
 }
 function avatarimg(id,type){
+  if(id.indexOf('http')>-1){
+    return id;
+  }
+  if(id.indexOf('data:image')){
+    return id;
+  }
   return CLOUDINARY.base+'/'+type+'/upload/'+id;
 }
 class My extends Component {
@@ -49,7 +56,9 @@ class My extends Component {
     
     //var user = props.user||{}
     this.state = {
-      user:{}
+      user:{},
+      avatarProgress:0,
+      avatarUploading:false
     };
   }
   componentDidMount(){
@@ -87,12 +96,8 @@ class My extends Component {
         //let source = { uri: 'data:image/png;base64,' + response.data };
         var avatarData='data:image/jpeg;base64,' + response.data;
         var user=this.state.user;
-        //user.avatar=avatarData;
-
-        //AsyncStorage.setItem('user',JSON.stringify(user));
-        //this.setState({
-        //  user: user
-        //});
+        
+        
         var timestamp=Date.now();
         var tags='app,avatar';
         var folder='avatar';
@@ -131,6 +136,11 @@ class My extends Component {
     var xhr = new XMLHttpRequest();
     var url = CLOUDINARY.image;
 
+    this.setState({
+      avatarUploading:true,
+      avatarProgress:0
+    })
+
     xhr.open('POST',url);
     xhr.onload=()=>{
       if(xhr.status!==200){
@@ -152,13 +162,46 @@ class My extends Component {
       }
       if(response && response.public_id){
         var user=this.state.user;
-        user.avatar=avatarimg(response.public_id,'image');
+        user.avatar=response.public_id;
         this.setState({
-          user:user
+          user:user,
+          avatarUploading:false,
+          avatarProgress:0
         });
+        this._asyncUser(true);
+      }
+    }
+    if(xhr.upload){
+      xhr.upload.onprogress=(event)=>{
+        if(event.lengthComputable){
+          var percent=Number((event.loaded / event.total)/toFixed(2));
+          this.setState({
+            avatarProgress:percent
+          })
+        }
       }
     }
     xhr.send(body);
+  }
+  _asyncUser(isAvatar){//更新图片到服务器上
+    var user=this.state.user;
+    if(user && user.access_token){
+      var url=config.api.update;
+      request.post(url,user)
+        .then((json)=>{
+          if(json.result=='0'){
+            var user=json.data;
+            if(isAvatar){
+              Alert.alert('头像更新成功')
+            }
+            this.setState({
+              user:user
+            },()=>{
+              AsyncStorage.setItem('user',JSON.stringify(user));
+            });
+          }
+        })
+    }
   }
   render() {
     var user=this.state.user;
@@ -170,12 +213,22 @@ class My extends Component {
         {
           user.avatar
           ? <TouchableOpacity onPress={this._pickPhoto.bind(this)} style={styles.avatarContainer}>
-              <Image source={{uri:user.avatar}} style={styles.avatarContainer}>
+              <Image source={{uri:this.avatarimg(user.avatar,'image')}} style={styles.avatarContainer}>
                 <View style={styles.avatarBox}>
-                  <Image
-                    source={{uri:user.avatar}}
-                    style={styles.avatar}
-                    />
+                  {
+                    this.state.avatarUploading
+                    ? <Progress.Circle 
+                      showsText={true}
+                      size={75}
+                      color={'#ee735c'}
+                      progress={this.state.avatarProgress}
+                      />
+                    : <Image
+                      source={{uri:this.avatarimg(user.avatar,'image')}}
+                      style={styles.avatar}
+                      />
+                  }
+                  
                 </View>
                 <Text style={styles.avatarTip}>戳这里换头像</Text>
               </Image>
@@ -183,10 +236,19 @@ class My extends Component {
           : <TouchableOpacity onPress={this._pickPhoto.bind(this)} style={styles.avatarContainer}>
               <Text style={styles.avatarTip}>添加头像</Text>
               <View style={styles.avatarBox}>
-                <Icon
-                  name="ios-cloud-upload-outline"
-                  style={styles.plusIcon}
-                  />
+                {
+                  this.state.avatarUploading
+                  ? <Progress.Circle 
+                    showsText={true}
+                    size={75}
+                    color={'#ee735c'}
+                    progress={this.state.avatarProgress}
+                    />
+                  : <Icon
+                    name="ios-cloud-upload-outline"
+                    style={styles.plusIcon}
+                    />
+                }
               </View>
             </TouchableOpacity>
         }

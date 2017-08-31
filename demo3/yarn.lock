@@ -3648,6 +3648,12 @@ react-native-image-picker@^0.26.4:
   version "0.26.4"
   resolved "http://registry.npm.taobao.org/react-native-image-picker/download/react-native-image-picker-0.26.4.tgz#e53b0564bef44cb3c96ff81594e1e874daa1f0b3"
 
+react-native-progress@^3.4.0:
+  version "3.4.0"
+  resolved "http://registry.npm.taobao.org/react-native-progress/download/react-native-progress-3.4.0.tgz#c002e6efb2f0b82dd6889510e669c492da2718ac"
+  dependencies:
+    prop-types "^15.5.8"
+
 react-native-sk-countdown@^1.0.1:
   version "1.0.1"
   resolved "http://registry.npm.taobao.org/react-native-sk-countdown/download/react-native-sk-countdown-1.0.1.tgz#e467bac16949060faa3a7c0db56d460ff8420451"

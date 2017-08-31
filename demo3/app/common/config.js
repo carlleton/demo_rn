@@ -15,6 +15,7 @@ var config = {
         comment:base+'api/comment',//获取和发生评论
         signup:base+'api/u/signup',//发送验证码
         verify:base+'api/u/verify',//验证登录
+        update:base+'api/u/update',//更新用户数据
         signature:base+'api/signature',//请求模块
     },
     access_token:'asdffc'
