@@ -21,3 +21,5 @@
 * [REACT NATIVE——REACT-NAVIGATION的使用](http://www.cnblogs.com/CrazyWL/p/7283600.html)
 * [react-native-sk-countdown 倒计时组件，不兼容RN 0.30版本](http://coding.imooc.com/learn/questiondetail/2063.html)
 * [Build APK Failed 'Unable to process incoming event 'ProgressComplete'](https://github.com/facebook/react-native/issues/10515)
+* [RN打包的那些坑儿](http://www.itdadao.com/articles/c15a1316667p0.html)
+* [React-Native工程项目打包编译发布过程详解](https://www.ctolib.com/topics-104789.html)
