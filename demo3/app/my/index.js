@@ -128,6 +128,9 @@ class My extends Component {
             this._upload(body);
           }
         })
+        .catch((err)=>{
+          console.log(err);
+        })
       }
     });
   }
@@ -140,7 +143,7 @@ class My extends Component {
       avatarUploading:true,
       avatarProgress:0
     })
-
+    console.log(url);
     xhr.open('POST',url);
     xhr.onload=()=>{
       if(xhr.status!==200){
@@ -174,7 +177,7 @@ class My extends Component {
     if(xhr.upload){
       xhr.upload.onprogress=(event)=>{
         if(event.lengthComputable){
-          var percent=Number((event.loaded / event.total)/toFixed(2));
+          var percent=Number((event.loaded / event.total).toFixed(2));
           this.setState({
             avatarProgress:percent
           })
@@ -213,7 +216,7 @@ class My extends Component {
         {
           user.avatar
           ? <TouchableOpacity onPress={this._pickPhoto.bind(this)} style={styles.avatarContainer}>
-              <Image source={{uri:this.avatarimg(user.avatar,'image')}} style={styles.avatarContainer}>
+              <Image source={{uri:avatarimg(user.avatar,'image')}} style={styles.avatarContainer}>
                 <View style={styles.avatarBox}>
                   {
                     this.state.avatarUploading
@@ -224,7 +227,7 @@ class My extends Component {
                       progress={this.state.avatarProgress}
                       />
                     : <Image
-                      source={{uri:this.avatarimg(user.avatar,'image')}}
+                      source={{uri:avatarimg(user.avatar,'image')}}
                       style={styles.avatar}
                       />
                   }

@@ -11,7 +11,7 @@
 * TextInput如果外层没有设置高度，则会因为高度不够被隐藏
 * Android下预iOS下的各组件都有相应的用法和区别，这是react nateive的大坑
 * 倒计时组件`react-native-sk-countdown`需要`react-addons-update`
-* react-native-sk-countdown在ES6中使用需要更改
+* react-native-sk-countdown在ES6中使用需要更改库中调用代码
 * 打包apk总是报` 'ProgressComplete ' (ProgressCompleteEvent)`，使用`gradlew assembleRelease --console plain`尝试
 
 **react-navigation**
