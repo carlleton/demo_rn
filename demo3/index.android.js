@@ -41,6 +41,13 @@ export default class demo3 extends Component {
   componentDidMount(){
     this._asyncAppStatus();
   }
+  _logout(){
+    AsyncStorage.removeItem('user');
+    this.setState({
+      logined:false,
+      user:null
+    })
+  }
   _asyncAppStatus(){
     AsyncStorage.getItem('user')
       .then((data)=>{
@@ -114,6 +121,7 @@ export default class demo3 extends Component {
       My:{
         screen:My,
         navigationOptions:{
+          logout:this._logout,
           tabBarIcon:({focused,tintColor})=>(
             <Icon name={focused?'ios-more':'ios-more-outline'} size={30} color={tintColor}/>
           )
@@ -142,8 +150,13 @@ export default class demo3 extends Component {
         }
       },
     });
+
     return (
-      <Tab />
+      <Tab
+        screenProps={{
+          logout:this._logout.bind(this)
+        }}
+       />
     );
   }
 }

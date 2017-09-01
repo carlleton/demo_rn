@@ -6,10 +6,13 @@ import {
   View,
   Image,
   Alert,
+  TextInput,
   TouchableOpacity,
   Dimensions,
-  AsyncStorage
+  AsyncStorage,
+  Modal
 } from 'react-native';
+import Button from 'react-native-button';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ImagePicker from 'react-native-image-picker';
 import * as Progress from 'react-native-progress';
@@ -53,13 +56,23 @@ function avatarimg(id,type){
 class My extends Component {
   constructor(props) {
     super(props);
-    
-    //var user = props.user||{}
+    var user = props.user||{}
     this.state = {
       user:{},
       avatarProgress:0,
-      avatarUploading:false
+      avatarUploading:false,
+      modalVisible:false
     };
+  }
+  _edit(){
+    this.setState({
+      modalVisible:true
+    })
+  }
+  _closeModal(){
+    this.setState({
+      modalVisible:false
+    })
   }
   componentDidMount(){
     AsyncStorage.getItem('user')
@@ -200,11 +213,30 @@ class My extends Component {
             this.setState({
               user:user
             },()=>{
+              this._closeModal();
               AsyncStorage.setItem('user',JSON.stringify(user));
             });
           }
         })
     }
+  }
+  _changeUserState(key,val){
+    var user=this.state.user;
+    user[key]=val;
+    this.setState({
+      user:user
+    })
+  }
+  _submit(){
+    this._asyncUser();
+  }
+  _logout(){
+    this.props.screenProps.logout();
+  }
+  _setModalVisible(isVisible){
+    this.setState({
+      modalVisible:isVisible
+    })
   }
   render() {
     var user=this.state.user;
@@ -212,6 +244,7 @@ class My extends Component {
       <View style={styles.container}>
         <View style={styles.toolbar}>
           <Text style={styles.toolbarTitle}>我的账户</Text>
+          <Text style={styles.toolbarEdit} onPress={this._edit.bind(this)}>编辑</Text>
         </View>
         {
           user.avatar
@@ -255,6 +288,73 @@ class My extends Component {
               </View>
             </TouchableOpacity>
         }
+        <Modal
+          animationType={'fade'}
+          visible={this.state.modalVisible}
+          onRequestClose={()=>{this._setModalVisible(false)}}>
+          <View style={styles.modalContainer}>
+            <Icon
+              name='ios-close-outline'
+              onPress={this._closeModal.bind(this)}
+              style={styles.closeIcon}
+             />
+             <View style={styles.fieldItem}>
+              <Text style={styles.label}>昵称</Text>
+              <TextInput
+               placeholder={"输入你的昵称"}
+               style={styles.inputField}
+               autoCapitalize={'none'}
+               autoCorrect={false}
+               defaultValue={user.nickname}
+               onChangeText={(text)=>{
+                this._changeUserState('nickname',text)
+               }}
+                />
+             </View>
+             <View style={styles.fieldItem}>
+              <Text style={styles.label}>年龄</Text>
+              <TextInput
+               placeholder={"输入你的年龄"}
+               style={styles.inputField}
+               autoCapitalize={'none'}
+               autoCorrect={false}
+               defaultValue={user.age+''}
+               onChangeText={(text)=>{
+                this._changeUserState('age',text)
+               }}
+                />
+             </View>
+             <View style={styles.fieldItem}>
+              <Text style={styles.label}>性别</Text>
+              <Icon.Button
+                onPress={()=>{
+                  this._changeUserState('gender','male')
+                }}
+                style={[
+                  styles.gender,
+                  user.gender==='male' && styles.genderChecked
+                  ]}
+                name='ios-paw-outline'>男</Icon.Button>
+              <Icon.Button
+                onPress={()=>{
+                  this._changeUserState('gender','female')
+                }}
+                style={[
+                  styles.gender,
+                  user.gender==='female' && styles.genderChecked
+                  ]}
+                name='ios-paw'>女</Icon.Button>
+             </View>
+             <Button
+               style={styles.btn}
+               onPress={this._submit.bind(this)}
+               >保存资料</Button>
+          </View>
+        </Modal>
+        <Button
+         style={styles.btn}
+         onPress={this._logout.bind(this)}
+         >退出登录</Button>
       </View>
     )
   }
@@ -276,6 +376,15 @@ const styles = StyleSheet.create({
     color:'#fff',
     textAlign:'center',
     fontWeight:'600'
+  },
+  toolbarEdit:{
+    position:'absolute',
+    right:10,
+    top:26,
+    color:'#fff',
+    textAlign:'right',
+    fontWeight:'600',
+    fontSize:14
   },
   avatarContainer:{
     width:width,
@@ -309,6 +418,57 @@ const styles = StyleSheet.create({
     fontSize:24,
     backgroundColor:'#fff',
     borderRadius:8
+  },
+  modalContainer:{
+    flex:1,
+    paddingTop:50,
+    backgroundColor:'#fff'
+  },
+  fieldItem:{
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    height:50,
+    paddingLeft:15,
+    paddingRight:15,
+    borderColor:'#eee',
+    borderBottomWidth:1
+  },
+  label:{
+    color:'#ccc',
+    marginRight:10
+  },
+  closeIcon:{
+    position:'absolute',
+    width:40,
+    height:40,
+    fontSize:32,
+    right:20,
+    top:30,
+    color:'#ee735c'
+  },
+  gender:{
+    backgroundColor:'#ccc'
+  },
+  genderChecked:{
+    backgroundColor:'#ee735c'
+  },
+  inputField:{
+    height:50,
+    flex:1,
+    color:'#666',
+    fontSize:14
+  },
+  btn:{
+    marginTop:25,
+    padding:10,
+    marginLeft:10,
+    marginRight:10,
+    backgroundColor:'transparent',
+    borderColor:'#ee735c',
+    borderWidth:1,
+    borderRadius:4,
+    color:'#ee735c'
   }
 });
 

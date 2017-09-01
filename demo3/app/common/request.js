@@ -34,9 +34,13 @@ request.post = function(url,body){
         body:JSON.stringify(body)
     })
     console.log(url);
+    console.log(options);
     return fetch(url,options)
         .then((response)=>response.json())
         .then((response)=>Mock.mock(response))
+        .catch((err)=>{
+            console.log(err);
+        })
 
 }
 
