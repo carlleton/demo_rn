@@ -78,6 +78,7 @@ class Login extends Component {
         }
       })
       .catch((err)=>{
+        console.log(err)
         return Alert.alert('获取验证码失败，请检查网络是否良好！');
       })
   }

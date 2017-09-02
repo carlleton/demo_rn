@@ -1,13 +1,37 @@
 'use strict'
 
+var sha1 = require('sha1')
 var mongoose = require('mongoose')
 var xss = require('xss')
 var User = mongoose.model('User')
 var uuid = require('uuid')
+var config = require('../../config/config')
+
 
 exports.signature = async (ctx,next)=>{
+  var body = ctx.request.body
+  var timestamp = body.timestamp
+  var type = body.type
+
+  var folder
+  var tags
+  if(type === 'avatar'){
+    folder = 'avatar'
+    tags = 'app,avatar'
+  }else if(type === 'video'){
+    folder = 'video'
+    tags = 'app,video'
+  }else if(type === 'audio'){
+    folder = 'audio'
+    tags = 'app,audio'
+  }
+
+  var signature = 'folder='+folder+'&tags='+tags+'&timestamp='+timestamp+config.cloudinary.api_secret;
+  signature=sha1(signature);
+
   ctx.response.body={
-    result:0
+    result:0,
+    data:signature
   }
 }
 

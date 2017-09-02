@@ -37,8 +37,7 @@ var photoOptions = {
 };
 var CLOUDINARY = {
   cloud_name: 'carlleton',  
-  api_key: '637443679349469',  
-  api_secret: 'JB-JvKhkesLuwEFdAjB7rCpakQ0', 
+  api_key: '637443679349469',
   base:'http://res.cloudinary.com/carlleton',
   image:'https://api.cloudinary.com/v1_1/carlleton/image/upload',
   video:'https://api.cloudinary.com/v1_1/carlleton/video/upload',
@@ -48,10 +47,10 @@ function avatarimg(id,type){
   if(id.indexOf('http')>-1){
     return id;
   }
-  if(id.indexOf('data:image')){
+  if(id.indexOf('data:image')>-1){
     return id;
   }
-  return CLOUDINARY.base+'/'+type+'/upload/'+id;
+  return CLOUDINARY.base+'/'+type+'/upload/'+id
 }
 class My extends Component {
   constructor(props) {
@@ -120,15 +119,11 @@ class My extends Component {
         request.post(signatureURL,{
           access_token:access_token,
           timestamp:timestamp,
-          folder:folder,
-          tgs:tags,
           type:'avatar',
         })
         .then((json)=>{
           if(json.result=='0'){
-            var signature = 'folder='+folder+'&tags='+tags+'&timestamp='+timestamp+CLOUDINARY.api_secret;
-            signature=sha1(signature);
-
+            var signature = json.data;
             var body = new FormData();
             body.append('folder',folder);
             body.append('signature',signature);
@@ -240,6 +235,7 @@ class My extends Component {
   }
   render() {
     var user=this.state.user;
+    console.log(avatarimg(user.avatar,'image'))
     return (
       <View style={styles.container}>
         <View style={styles.toolbar}>
@@ -249,7 +245,9 @@ class My extends Component {
         {
           user.avatar
           ? <TouchableOpacity onPress={this._pickPhoto.bind(this)} style={styles.avatarContainer}>
-              <Image source={{uri:avatarimg(user.avatar,'image')}} style={styles.avatarContainer}>
+              <Image
+                source={{uri:avatarimg(user.avatar,'image')}}
+                style={styles.avatarContainer}>
                 <View style={styles.avatarBox}>
                   {
                     this.state.avatarUploading
