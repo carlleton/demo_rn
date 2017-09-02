@@ -1,0 +1,20 @@
+{
+  "name": "demo3-server",
+  "version": "1.0.0",
+  "main": "app.js",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "koa": "^2.3.0",
+    "koa-bodyparser": "^4.2.0",
+    "koa-logger": "^3.0.1",
+    "koa-router": "^7.2.1",
+    "koa-session": "^5.5.0",
+    "lodash": "^4.17.4",
+    "mongoose": "^4.11.9",
+    "sha1": "^1.1.1",
+    "speakeasy": "^2.0.0",
+    "uuid": "^3.1.0",
+    "xss": "^0.3.4"
+  }
+}
