@@ -6,7 +6,7 @@ var mongoose = require('mongoose')
 var db = 'mongodb://localhost/demo3'
 
 mongoose.Promise = require('bluebird')
-mongoose.connect(db)
+mongoose.connect(db,{useMongoClient: true})
 
 var models_path = path.join(__dirname,'/app/models')
 

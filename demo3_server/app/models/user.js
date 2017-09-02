@@ -8,7 +8,11 @@ var UserSchema = new mongoose.Schema({
     type:String
   },
   areaCode:String,
-  verify:String,
+  verifycode:String,
+  verified:{
+    type:Boolean,
+    default:false
+  },
   access_token:String,
   nickname:String,
   gender:String,
