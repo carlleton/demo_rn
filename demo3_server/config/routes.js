@@ -11,11 +11,11 @@ module.exports = function(){
     })
 
     //user
-    router.post('/u/signup',User.signup)
-    router.post('/u/verify',User.verify)
-    router.post('/u/update',User.update)
+    router.get('/u/signup',User.signup)
+    router.get('/u/verify',User.verify)
+    router.get('/u/update',User.update)
 
     //app
-    router.post('/signature',App.signature)
+    router.get('/signature',App.signature)
     return router
 }

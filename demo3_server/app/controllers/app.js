@@ -1,7 +1,7 @@
 'use strict'
 
-exports.signature = function(next){
-    this.body={
+exports.signature = async (ctx,next)=>{
+    ctx.response.body={
         result:0
     }
 }
