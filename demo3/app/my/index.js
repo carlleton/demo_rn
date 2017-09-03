@@ -16,7 +16,7 @@ import Button from 'react-native-button';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ImagePicker from 'react-native-image-picker';
 import * as Progress from 'react-native-progress';
-import sha1 from 'sha1';
+import sha1 from 'sha1'
 //var ImagePicker = require('NativeModules').ImagePickerManager;
 
 var request = require('../common/request');
@@ -35,22 +35,19 @@ var photoOptions = {
     path: 'images'
   }
 };
-var CLOUDINARY = {
-  cloud_name: 'carlleton',  
-  api_key: '637443679349469',
-  base:'http://res.cloudinary.com/carlleton',
-  image:'https://api.cloudinary.com/v1_1/carlleton/image/upload',
-  video:'https://api.cloudinary.com/v1_1/carlleton/video/upload',
-  audio:'https://api.cloudinary.com/v1_1/carlleton/raw/upload',
-}
+
 function avatarimg(id,type){
+  if(!id)return ''
   if(id.indexOf('http')>-1){
     return id;
   }
   if(id.indexOf('data:image')>-1){
     return id;
   }
-  return CLOUDINARY.base+'/'+type+'/upload/'+id
+  if(config.cloud==='qiniu'){
+    return config.qiniu.base+'/'+id
+  }
+  return config.cloudinary.base+'/'+type+'/upload/'+id
 }
 class My extends Component {
   constructor(props) {
@@ -87,6 +84,66 @@ class My extends Component {
         }
       })
   }
+
+  _getQiniuToken(response){
+    var signatureURL=config.api.signature;
+    var access_token = this.state.user.access_token
+    var uri = response.uri
+    return request.post(signatureURL,{
+        access_token:access_token,
+        cloud:'qiniu'
+      })
+      .then((json)=>{
+        console.log(json)
+        var data = json.data
+        var token = data.token
+        var key = data.key
+        var body = new FormData()
+        body.append('token',token)
+        body.append('key',key)
+        body.append('file',{
+          type:'image/png',
+          uri:uri
+        })
+        this._upload(body);
+      })
+      .catch((err)=>{
+        console.log(err);
+      })
+  }
+  _getCloudianryToken(response){
+    var signatureURL=config.api.signature;
+    var avatarData='data:image/jpeg;base64,' + response.data;
+    var access_token = this.state.user.access_token
+    var timestamp=Date.now();
+    var tags='app,avatar';
+    var folder='avatar';
+    return request.post(signatureURL,{
+      access_token:access_token,
+      timestamp:timestamp,
+      type:'avatar',
+      cloud:'cloudinary'
+    })
+    .then((json)=>{
+      if(json.result=='0'){
+        var signature = json.data;
+        var body = new FormData();
+        body.append('folder',folder);
+        body.append('signature',signature);
+        body.append('tags',tags);
+        body.append('timestamp',timestamp);
+        body.append('api_key',config.cloudinary.api_key);
+        body.append('resource_type','image');
+        body.append('file',avatarData);
+
+        this._upload(body);
+      }
+    })
+    .catch((err)=>{
+      console.log(err);
+    })
+  }
+
   _pickPhoto(){
     console.log('aaaa');
     ImagePicker.showImagePicker(photoOptions, (response) => {
@@ -102,50 +159,23 @@ class My extends Component {
         console.log('User tapped custom button: ', response.customButton);
       }
       else {
-        //let source = { uri: response.uri };
-
-        // You can also display the image using data:
-        //let source = { uri: 'data:image/png;base64,' + response.data };
-        var avatarData='data:image/jpeg;base64,' + response.data;
-        var user=this.state.user;
-        
-        
-        var timestamp=Date.now();
-        var tags='app,avatar';
-        var folder='avatar';
-        var signatureURL=config.api.signature;
-        var access_token=this.state.user.access_token;
-
-        request.post(signatureURL,{
-          access_token:access_token,
-          timestamp:timestamp,
-          type:'avatar',
-        })
-        .then((json)=>{
-          if(json.result=='0'){
-            var signature = json.data;
-            var body = new FormData();
-            body.append('folder',folder);
-            body.append('signature',signature);
-            body.append('tags',tags);
-            body.append('timestamp',timestamp);
-            body.append('api_key',CLOUDINARY.api_key);
-            body.append('resource_type','image');
-            body.append('file',avatarData);
-
-            this._upload(body);
-          }
-        })
-        .catch((err)=>{
-          console.log(err);
-        })
+        if(config.cloud=='qiniu'){
+          this._getQiniuToken(response)
+        }else if(config.cloud=='cloudinary'){
+          this._getCloudianryToken(response)
+        }
       }
     });
   }
   //上传到图床
   _upload(body){
     var xhr = new XMLHttpRequest();
-    var url = CLOUDINARY.image;
+    var url = ''
+    if(config.cloud=='qiniu'){
+      url = config.qiniu.upload
+    }else if(config.cloud=='cloudinary'){
+      url = config.cloudinary.image
+    }
 
     this.setState({
       avatarUploading:true,
@@ -171,9 +201,13 @@ class My extends Component {
         console.log(e);
         console.log('parse fails');
       }
-      if(response && response.public_id){
+      if(response){
         var user=this.state.user;
-        user.avatar=response.public_id;
+        if(response.public_id){
+          user.avatar=response.public_id
+        }else if(response.key){
+          user.avatar = response.key
+        }
         this.setState({
           user:user,
           avatarUploading:false,

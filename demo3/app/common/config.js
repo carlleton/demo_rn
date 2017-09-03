@@ -19,6 +19,19 @@ var config = {
         update:base+'/api/u/update',//更新用户数据
         signature:base+'/api/signature',//请求模块
     },
-    access_token:''
+    access_token:'',
+    cloud:'qiniu',//qiniu||cloudinary
+    qiniu:{
+        upload:'http://upload.qiniu.com/',
+        base:'http://ovovauhwv.bkt.clouddn.com',
+    },
+    cloudinary : {
+      cloud_name: 'carlleton',  
+      api_key: '637443679349469',
+      base:'http://res.cloudinary.com/carlleton',
+      image:'https://api.cloudinary.com/v1_1/carlleton/image/upload',
+      video:'https://api.cloudinary.com/v1_1/carlleton/video/upload',
+      audio:'https://api.cloudinary.com/v1_1/carlleton/raw/upload',
+    }
 }
 module.exports = config

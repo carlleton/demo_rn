@@ -15,6 +15,9 @@ module.exports = function(){
   router.post('/u/verify',App.hasBody,User.verify)
   router.post('/u/update',App.hasBody,App.hasToken,User.update)
 
+  //
+  router.get('/list',App.empty)
+
   //app
   router.post('/signature',App.hasBody,App.hasToken,App.signature)
   return router

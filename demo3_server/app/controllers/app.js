@@ -1,40 +1,35 @@
 'use strict'
 
-var sha1 = require('sha1')
 var mongoose = require('mongoose')
 var xss = require('xss')
 var User = mongoose.model('User')
 var uuid = require('uuid')
 var config = require('../../config/config')
-
+var robot = require('../service/robot')
 
 exports.signature = async (ctx,next)=>{
   var body = ctx.request.body
-  var timestamp = body.timestamp
-  var type = body.type
+  var cloud = body.cloud
+  var token
+  var key = ''
 
-  var folder
-  var tags
-  if(type === 'avatar'){
-    folder = 'avatar'
-    tags = 'app,avatar'
-  }else if(type === 'video'){
-    folder = 'video'
-    tags = 'app,video'
-  }else if(type === 'audio'){
-    folder = 'audio'
-    tags = 'app,audio'
+  if(cloud == 'qiniu'){
+    key = uuid.v4()+'.png'
+    token = robot.getQiniuToken(key)
+  }else{
+    token = robot.getCloudinaryToken(body)
   }
-
-  var signature = 'folder='+folder+'&tags='+tags+'&timestamp='+timestamp+config.cloudinary.api_secret;
-  signature=sha1(signature);
 
   ctx.response.body={
     result:0,
-    data:signature
+    data:{
+      token:token,
+      key:key
+    }
   }
 }
 
+//过滤器，判断是否有post的body
 exports.hasBody = async (ctx,next)=>{
   var body = ctx.request.body||{}
   if(Object.keys(body).length===0){
@@ -47,7 +42,7 @@ exports.hasBody = async (ctx,next)=>{
   console.log('hasBody')
   await next()
 }
-//是否存在token
+//过滤器，判断是否存在access_token
 exports.hasToken = async (ctx,next)=>{
   var access_token = ctx.request.query.access_token
 
@@ -76,4 +71,12 @@ exports.hasToken = async (ctx,next)=>{
   ctx.session = ctx.session||{}
   ctx.session.user = user
   await next()
+}
+
+exports.empty = (ctx,next)=>{
+  ctx.body = {
+    return:0,
+    data:[],
+    total:0
+  }
 }
