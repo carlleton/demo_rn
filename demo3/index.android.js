@@ -76,9 +76,9 @@ export default class demo3 extends Component {
       })
   }
   render() {
-    if(!this.state.logined){
-      return <Login afterLogin={this._afterLogin.bind(this)}></Login>;
-    }
+    // if(!this.state.logined){
+    //   return <Login afterLogin={this._afterLogin.bind(this)}></Login>;
+    // }
     var ListNavigator = StackNavigator({
       List: {
         screen: List,

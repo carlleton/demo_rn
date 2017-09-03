@@ -34,11 +34,8 @@ class ListDetail extends Component {
     this.state = {
       data:props.navigation.state.params.data,
       comments:[],//评论列表
-      rate:1,
-      muted:false,
-      resizeMode:'contain',
-      paused:false,
-      repeat:false,
+      
+      //video loads
       videoLoaded:false,
       playing:false,
       videoProgress:0.01,//播放进度
@@ -47,6 +44,13 @@ class ListDetail extends Component {
       videoOK:true,
       isLoading:false,
       isRefreshing:false,
+
+      //video player
+      rate:1,
+      muted:false,
+      resizeMode:'contain',
+      paused:false,
+      repeat:false,
 
       //modal
       content:'',
