@@ -6,12 +6,17 @@ import {
   View,
   TouchableOpacity,
   Image,
-  Dimensions
+  Alert,
+  Dimensions,
+  AsyncStorage
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Video from 'react-native-video';
 import ImagePicker from 'react-native-image-picker';
+import * as Progress from 'react-native-progress';
 
+var request = require('../common/request');
+var config = require('../common/config');
 var width = Dimensions.get('window').width;
 var height = Dimensions.get('window').height;
 var videoOptions = {
@@ -33,6 +38,7 @@ class Edit extends Component {
     super(props);
   
     this.state = {
+      user:{},
       previewVideo:null,
 
       //video loads
@@ -45,6 +51,10 @@ class Edit extends Component {
       isLoading:false,
       isRefreshing:false,
 
+      videoUploadedProgress:0.01,
+      videoUploading:false,
+      videoUploaded:false,
+
       //video player
       rate:1,
       muted:true,
@@ -52,6 +62,20 @@ class Edit extends Component {
       paused:false,
       repeat:false,
     };
+  }
+  componentDidMount(){
+    AsyncStorage.getItem('user')
+      .then((data)=>{
+        var user=null;
+        if(data){
+          user=JSON.parse(data);
+        }
+        if(user && user.access_token){
+          this.setState({
+            user:user
+          })
+        }
+      })
   }
   _onLoadStart(){
     console.log('load start');
@@ -115,6 +139,123 @@ class Edit extends Component {
       })
     }
   }
+  _getQiniuToken(response){
+    var signatureURL=config.api.signature;
+    var access_token = this.state.user.access_token
+    var uri = response.uri
+    return request.post(signatureURL,{
+        access_token:access_token,
+        type:'video',
+        cloud:'qiniu'
+      })
+      .then((json)=>{
+        console.log(json)
+        var data = json.data
+        var token = data.token
+        var key = data.key
+        var body = new FormData()
+        body.append('token',token)
+        body.append('key',key)
+        body.append('file',{
+          type:'video/mp4',
+          uri:uri
+        })
+        this._upload(body);
+      })
+      .catch((err)=>{
+        console.log(err);
+      })
+  }
+  _getCloudianryToken(response){
+    var signatureURL=config.api.signature;
+    var avatarData='data:image/jpeg;base64,' + response.data;
+    var access_token = this.state.user.access_token
+    var timestamp=Date.now();
+    var tags='app,avatar';
+    var folder='avatar';
+    return request.post(signatureURL,{
+      access_token:access_token,
+      timestamp:timestamp,
+      type:'avatar',
+      cloud:'cloudinary'
+    })
+    .then((json)=>{
+      if(json.result=='0'){
+        var signature = json.data;
+        var body = new FormData();
+        body.append('folder',folder);
+        body.append('signature',signature);
+        body.append('tags',tags);
+        body.append('timestamp',timestamp);
+        body.append('api_key',config.cloudinary.api_key);
+        body.append('resource_type','image');
+        body.append('file',avatarData);
+
+        this._upload(body);
+      }
+    })
+    .catch((err)=>{
+      console.log(err);
+    })
+  }
+  //上传到图床
+  _upload(body){
+    var xhr = new XMLHttpRequest();
+    var url = ''
+    if(config.cloud=='qiniu'){
+      url = config.qiniu.upload
+    }else if(config.cloud=='cloudinary'){
+      url = config.cloudinary.video
+    }
+
+    this.setState({
+      videoUploadedProgress:0,
+      videoUploading:true,
+      videoUploaded:false
+    })
+    console.log(url);
+    xhr.open('POST',url);
+    xhr.onload=()=>{
+      if(xhr.status!==200){
+        Alert.alert('请求失败');
+        console.log(xhr.responseText);
+        return;
+      }
+      if(!xhr.responseText){
+        Alert.alert('请求失败');
+        return;
+      }
+      var response = xhr.responseText;
+      console.log(response)
+      try{
+        response=JSON.parse(response);
+
+      }catch(e){
+        console.log(e);
+        console.log('parse fails');
+      }
+      if(response){
+        console.log(response)
+        console.log(this.state.videoUploadedProgress)
+        this.setState({
+          video:response,
+          videoUploading:false,
+          videoUploaded:true
+        });
+      }
+    }
+    if(xhr.upload){
+      xhr.upload.onprogress=(event)=>{
+        if(event.lengthComputable){
+          var percent=Number((event.loaded / event.total).toFixed(2));
+          this.setState({
+            videoUploadedProgress:percent
+          })
+        }
+      }
+    }
+    xhr.send(body);
+  }
   _pickVideo(){
     console.log('aaaa');
     ImagePicker.showImagePicker(videoOptions, (response) => {
@@ -123,24 +264,23 @@ class Edit extends Component {
       if (response.didCancel) {
         return;
       }
-      var uri = response.uri
-      this.setState({
-        previewVideo:uri
-      })
-
-      // else if (response.error) {
-      //   console.log('ImagePicker Error: ', response.error);
-      // }
-      // else if (response.customButton) {
-      //   console.log('User tapped custom button: ', response.customButton);
-      // }
-      // else {
-      //   if(config.cloud=='qiniu'){
-      //     this._getQiniuToken(response)
-      //   }else if(config.cloud=='cloudinary'){
-      //     this._getCloudianryToken(response)
-      //   }
-      // }
+      if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      }
+      else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+      }
+      else {
+        var uri = response.uri
+        this.setState({
+          previewVideo:uri
+        })
+        if(config.cloud=='qiniu'){
+          this._getQiniuToken(response)
+        }else if(config.cloud=='cloudinary'){
+          this._getCloudianryToken(response)
+        }
+      }
     });
   }
   render() {
@@ -175,6 +315,18 @@ class Edit extends Component {
                   onError={this._onError.bind(this)}
                   onBuffer={this._onBuffer.bind(this)}
                 />
+                {
+                  !this.state.videoUploaded && this.state.videoUploading
+                  ? <View style={styles.progressTipBox}>
+                      <Progress.Bar 
+                        width={width}
+                        color={'#ee735c'}
+                        progress={this.state.videoUploadedProgress}
+                      />
+                      <Text style={styles.progressTip}>正式生成静音视频，已完成{(this.state.videoUploadedProgress * 100).toFixed(2)}%</Text>
+                    </View>
+                  : null
+                }
               </View>
             </View>
           : <TouchableOpacity style={styles.uploadContainer} onPress={this._pickVideo.bind(this)}>
@@ -267,7 +419,19 @@ var styles = StyleSheet.create({
     width:width,
     height:height * 0.6
   },
-
+  progressTipBox:{
+    position:'absolute',
+    left:0,
+    bottom:0,
+    width:width,
+    height:30,
+    backgroundColor:'rgba(244,244,244,0.65)'
+  },
+  progressTip:{
+    color:'#333',
+    width:width-10,
+    padding:5
+  }
 });
 
 export default Edit

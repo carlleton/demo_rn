@@ -10,22 +10,18 @@ var robot = require('../service/robot')
 exports.signature = async (ctx,next)=>{
   var body = ctx.request.body
   var cloud = body.cloud
-  var token
-  var key = ''
+  
+  var data
 
   if(cloud == 'qiniu'){
-    key = uuid.v4()+'.png'
-    token = robot.getQiniuToken(key)
+    data = robot.getQiniuToken(body)
   }else{
-    token = robot.getCloudinaryToken(body)
+    data = robot.getCloudinaryToken(body)
   }
 
   ctx.response.body={
     result:0,
-    data:{
-      token:token,
-      key:key
-    }
+    data:data
   }
 }
 

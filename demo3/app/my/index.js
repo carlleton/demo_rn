@@ -91,7 +91,8 @@ class My extends Component {
     var uri = response.uri
     return request.post(signatureURL,{
         access_token:access_token,
-        cloud:'qiniu'
+        cloud:'qiniu',
+        type:'avatar'
       })
       .then((json)=>{
         console.log(json)
