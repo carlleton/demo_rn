@@ -23,3 +23,8 @@
 * [Build APK Failed 'Unable to process incoming event 'ProgressComplete'](https://github.com/facebook/react-native/issues/10515)
 * [RN打包的那些坑儿](http://www.itdadao.com/articles/c15a1316667p0.html)
 * [React-Native工程项目打包编译发布过程详解](https://www.ctolib.com/topics-104789.html)
+
+国内镜像：
+* [JCenter下载太慢？教你修改Maven仓库地址为国内镜像](http://blog.csdn.net/wuqilianga/article/details/54894367)
+* [解决android studio引用远程仓库下载慢(JCenter下载慢)](http://blog.csdn.net/linglingchenchen/article/details/62236723)
+
