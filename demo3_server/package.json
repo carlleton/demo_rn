@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.5.0",
+    "cloudinary": "^1.9.0",
     "koa": "^2.3.0",
     "koa-bodyparser": "^4.2.0",
     "koa-logger": "^3.0.1",

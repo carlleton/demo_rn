@@ -18,6 +18,7 @@ var config = {
         verify:base+'/api/u/verify',//验证登录
         update:base+'/api/u/update',//更新用户数据
         signature:base+'/api/signature',//请求模块
+        video:base+'/api/list/video',//上传视频
     },
     access_token:'',
     cloud:'qiniu',//qiniu||cloudinary

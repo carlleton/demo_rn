@@ -51,6 +51,8 @@ class Edit extends Component {
       isLoading:false,
       isRefreshing:false,
 
+      //video upload
+      video:null,
       videoUploadedProgress:0.01,
       videoUploading:false,
       videoUploaded:false,
@@ -242,6 +244,22 @@ class Edit extends Component {
           videoUploading:false,
           videoUploaded:true
         });
+        var videoURL = config.api.video
+        var access_token = this.state.user.access_token
+
+        request.post(videoURL,{
+          access_token:access_token,
+          video:response
+        })
+        .catch((err)=>{
+          console.log(err)
+          Alert.alert('视频同步出错，请重新上传！')
+        })
+        .then((data)=>{
+          if(!data||!data.result){
+            Alert.alert('视频同步出错，请重新上传！')
+          }
+        })
       }
     }
     if(xhr.upload){
@@ -290,7 +308,11 @@ class Edit extends Component {
           <Text style={styles.toolbarTitle}>
             {this.state.previewVideo ? '点击按钮配音':'将开阔人生，从配音开始'}
           </Text>
-          <Text style={styles.toolbarEdit} onPress={this._pickVideo.bind(this)}>更换视频</Text>
+          {
+            this.state.previewVideo && this.state.videoUploaded
+            ? <Text style={styles.toolbarEdit} onPress={this._pickVideo.bind(this)}>更换视频</Text>
+            : null
+          }
         </View>
         <View style={styles.page}>
         {

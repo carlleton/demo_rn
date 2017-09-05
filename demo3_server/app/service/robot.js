@@ -2,6 +2,8 @@
 
 var sha1 = require('sha1')
 var qiniu = require('qiniu')
+var cloudinary = require('cloudinary')
+var Promise = require('bluebird')
 var uuid = require('uuid')
 var config = require('../../config/config')
 
@@ -9,6 +11,7 @@ var accessKey = config.qiniu.AK
 var secretKey = config.qiniu.SK
 var mac = new qiniu.auth.digest.Mac(accessKey, secretKey)
 
+cloudinary.config(config.cloudinary)
 
 exports.getQiniuToken = function(body){
   var type = body.type
@@ -38,6 +41,22 @@ exports.getQiniuToken = function(body){
     token:token,
     key:key
   }
+}
+
+exports.uploadToCloudinary = function(url){
+
+  return new Promise((resolve,reject)=>{
+    cloudinary.uploader.upload(url,(result)=>{
+      if(result.public_id){
+        resolve(result)
+      }else{
+        reject(result)
+      }
+    },{
+      resource_type:'video',
+      folder:'video'
+    })
+  })
 }
 
 exports.getCloudinaryToken = function(body){
