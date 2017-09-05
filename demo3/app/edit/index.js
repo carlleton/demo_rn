@@ -14,6 +14,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Video from 'react-native-video';
 import ImagePicker from 'react-native-image-picker';
 import * as Progress from 'react-native-progress';
+import {CountDownText} from 'react-native-sk-countdown';
+
 
 var request = require('../common/request');
 var config = require('../common/config');
@@ -42,8 +44,6 @@ class Edit extends Component {
       previewVideo:null,
 
       //video loads
-      videoLoaded:false,
-      playing:false,
       videoProgress:0.01,//播放进度
       videoTotal:0,//总时长
       currentTime:0,//当前时间
@@ -56,6 +56,10 @@ class Edit extends Component {
       videoUploadedProgress:0.01,
       videoUploading:false,
       videoUploaded:false,
+
+      //count down
+      counting:false,
+      recording:false,
 
       //video player
       rate:1,
@@ -94,20 +98,18 @@ class Edit extends Component {
       currentTime:Number(currentTime.toFixed(2)),
       videoProgress:percent
     };
-    if(!this.state.videoLoaded){
-      newState.videoLoaded=true;
-    }
-    if(!this.state.playing){
-      newState.playing=true;
-    }
     this.setState(newState);
   }
   _onEnd(){
     console.log('on end');
-    this.setState({
+    var newState={
       paused:true,
-      playing:false
-    })
+    }
+    if(this.state.recording){
+      newState.videoProgress=1
+      newState.recording=false
+    }
+    this.setState(newState)
   }
   _onError(e){
     this.setState({
@@ -139,6 +141,22 @@ class Edit extends Component {
       this.setState({
         paused:false
       })
+    }
+  }
+  _record(){
+    this.setState({
+      videoProgress:0,
+      counting:false,
+      recording:true
+    })
+    this.videoPlayer.seek(0)
+  }
+  _counting(){
+    if(!this.state.counting && !this.state.recording){
+      this.setState({
+        counting:true
+      })
+      this.videoPlayer.seek(this.state.videoTotal - 0.01)
     }
   }
   _getQiniuToken(response){
@@ -349,6 +367,18 @@ class Edit extends Component {
                     </View>
                   : null
                 }
+                {
+                  this.state.recording
+                  ? <View style={styles.progressTipBox}>
+                      <Progress.Bar 
+                        width={width}
+                        color={'#ee735c'}
+                        progress={this.state.videoProgress}
+                      />
+                      <Text style={styles.progressTip}>录制声音中{(this.state.videoProgress * 100).toFixed(2)}%</Text>
+                    </View>
+                  : null
+                }
               </View>
             </View>
           : <TouchableOpacity style={styles.uploadContainer} onPress={this._pickVideo.bind(this)}>
@@ -359,6 +389,34 @@ class Edit extends Component {
               </View>
              </TouchableOpacity>
         }
+        {
+          this.state.videoUploaded
+          ? <View style={styles.recordBox}>
+              <View style={[styles.recordIconBox,this.state.recording && styles.recordOn]}>
+                {
+                  this.state.counting && !this.state.recording
+                  ?<CountDownText
+                    style={styles.countbtn}
+                    countType='seconds' // 计时类型：seconds / date
+                    auto={true} // 自动开始
+                    afterEnd={this._record.bind(this)} // 结束回调
+                    timeLeft={3} // 正向计时 时间起点为0秒
+                    step={-1} // 计时步长，以秒为单位，正数则为正计时，负数为倒计时
+                    startText='准备录制' // 开始的文本
+                    endText='Go' // 结束的文本
+                    intervalText={(sec) => { // 定时的文本回调
+                      return sec === 0?'Go':sec
+                    }}
+                   />
+                  : <TouchableOpacity onPress={this._counting.bind(this)}>
+                      <Icon name='ios-mic' style={styles.recordIcon} />
+                     </TouchableOpacity>
+                }
+              </View>
+            </View>
+          : null
+        }
+        
         </View>
       </View>
     )
@@ -453,6 +511,35 @@ var styles = StyleSheet.create({
     color:'#333',
     width:width-10,
     padding:5
+  },
+  recordBox:{
+    width:width,
+    height:60,
+    alignItems:'center'
+  },
+  recordIconBox:{
+    width:68,
+    height:68,
+    marginTop:-30,
+    borderRadius:34,
+    backgroundColor:'#ee735c',
+    borderWidth:1,
+    borderColor:'#fff',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  recordIcon:{
+    fontSize:58,
+    backgroundColor:'transparent',
+    color:'#fff'
+  },
+  countBtn:{
+    fontSize:32,
+    fontWeight:'600',
+    color:'#fff'
+  },
+  recordOn:{
+    backgroundColor:'#ccc'
   }
 });
 
