@@ -16,6 +16,7 @@ import ImagePicker from 'react-native-image-picker';
 import * as Progress from 'react-native-progress';
 import {CountDownText} from 'react-native-sk-countdown';
 import {AudioRecorder, AudioUtils} from 'react-native-audio';
+import * as Progress from 'react-native-progress';
 
 var _ = require('lodash')
 var request = require('../common/request');
@@ -61,6 +62,12 @@ var defaultState={
   audioName:'audio.aac',
   audioPlaying:false,
   recordDone:false,
+
+  //audio upload
+  audio:null,
+  audioUploadedProgress:0.01,
+  audioUploading:false,
+  audioUploaded:false,
 
   //video player
   rate:1,
@@ -471,6 +478,28 @@ class Edit extends Component {
           : null
         }
         
+        {
+          this.state.videoUploaded && this.state.recordDone
+          ? <View style={styles.uploadAudioBox}>
+              {
+                !this.state.audioUploaded && !this.state.audioUploading
+                ? <Text style={styles.uploadAudioText}>下一步</Text>
+                : null
+              }
+              {
+                this.state.audioUploading
+                ? <Progress.Circle 
+                    showsText={true}
+                    size={60}
+                    color={'#ee735c'}
+                    progress={this.state.audioUploadProgress}
+                    />
+                : null
+              }
+            </View>
+          : null
+        }
+
         </View>
       </View>
     )
@@ -615,6 +644,23 @@ var styles = StyleSheet.create({
   },
   previewText:{
     fontSize:20,
+    color:'#ee735c'
+  },
+  uploadAudioBox:{
+    width:width,
+    height:60,
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+
+  uploadAudioText:{
+    width:width - 20,
+    borderWidth:1,
+    borderColor:'#ee735c',
+    borderRadius:5,
+    textAlign:'center',
+    fontSize:30,
     color:'#ee735c'
   }
 });
