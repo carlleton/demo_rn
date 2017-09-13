@@ -3626,6 +3626,10 @@ react-devtools@^2.5.0:
     react-devtools-core "^2.5.0"
     update-notifier "^2.1.0"
 
+react-native-audio@^3.2.2:
+  version "3.2.2"
+  resolved "http://registry.npm.taobao.org/react-native-audio/download/react-native-audio-3.2.2.tgz#0fcbda338c9cc85aabed595f9c762fa6eebbdb88"
+
 react-native-button@^2.1.0:
   version "2.1.0"
   resolved "http://registry.npm.taobao.org/react-native-button/download/react-native-button-2.1.0.tgz#a39e23292922afeea4f7be141dd43e18f1b51876"

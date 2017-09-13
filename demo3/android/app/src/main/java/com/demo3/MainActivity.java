@@ -1,6 +1,7 @@
 package com.demo3;
 
 import com.facebook.react.ReactActivity;
+import com.rnim.rn.audio.ReactNativeAudioPackage;
 
 
 public class MainActivity extends ReactActivity {
